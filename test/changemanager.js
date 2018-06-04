@@ -97,14 +97,14 @@ contract('ChangeManager', function (accounts) {
                             result.logs.filter(log => log.event === "NewVote")
                                 .map(log => log.args)
                                 .forEach(args => {
-                                    console.log("Args5: ", args);
+                                    // console.log("Args5: ", args);
                                 });
                         });
-                    changerequestSecond.releaseChange().then(function (result) {
+                    return changerequestSecond.releaseChange().then(function (result) {
                         result.logs.filter(log => log.event === "NewVote")
                             .map(log => log.args)
                             .forEach(args => {
-                                console.log("Args5: ", args);
+                                // console.log("Args5: ", args);
                             });
                     });
                 });

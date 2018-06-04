@@ -1,12 +1,13 @@
 pragma solidity ^0.4.24;
 pragma experimental ABIEncoderV2;
 
-import { ChangeTracker } from './ChangeTracker.sol';
-import { ChangeRequest } from './ChangeRequest.sol';
+import {ChangeTracker} from './ChangeTracker.sol';
+import {ChangeRequest} from './ChangeRequest.sol';
 
 contract ChangeManager {
     address private _constructionManager;
     ChangeRequest[] private _changes;
+
     event NewChangeRequest(
         address _changeRequestAddress,
         bytes20 indexed _gitHash,
@@ -15,15 +16,15 @@ contract ChangeManager {
         uint256 _estimation
     );
 
-    // TODO: Use roles from SIMULTAN
-    enum Role {
-        constructionManager, architect, engineer, electrician, contractor
-    }
-
-    struct StakeHolder {
-        address identity;
-        Role role;
-    }
+    //    // TODO: Use roles from SIMULTAN
+    //    enum Role {
+    //        constructionManager, architect, engineer, electrician, contractor
+    //    }
+    //
+    //    struct StakeHolder {
+    //        address identity;
+    //        Role role;
+    //    }
 
     constructor() public {
         _constructionManager = msg.sender;
@@ -31,7 +32,7 @@ contract ChangeManager {
 
     function createNewChangeRequest(
         bytes20 gitHash, string additionalInformation, uint256 costs, uint256 estimation
-    ) public returns (ChangeRequest)
+    ) public
     {
         ChangeRequest changerequest = new ChangeRequest(gitHash, additionalInformation, costs, estimation, msg.sender);
         _changes.push(changerequest);

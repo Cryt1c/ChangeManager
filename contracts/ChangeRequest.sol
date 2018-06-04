@@ -7,7 +7,7 @@ contract ChangeRequest is ChangeTracker{
     Change private _currentChange;
     address private _changeOwner;
     address private _constructionManager;
-    mapping(address => bool) private _voted;
+    mapping(address => bool) private _allowdToVote;
     uint256 private _voteCount;
     State private _currentState;
     string private _rejectionReason;
@@ -16,7 +16,8 @@ contract ChangeRequest is ChangeTracker{
         address _voter,
         bool _vote,
         State _currentState,
-        string _rejectionReason
+        string _voteInfo,
+        uint256 _votesLeft
     );
 
     constructor(bytes20 gitHash, string additionalInformation, uint256 costs, uint256 estimation, address manager) public {
@@ -41,35 +42,35 @@ contract ChangeRequest is ChangeTracker{
         if (acceptChange) {
             _voteCount = responsibleParties.length;
             for (uint i = 0; i < responsibleParties.length; i++) {
-                _voted[responsibleParties[i]] = false;
+                _allowdToVote[responsibleParties[i]] = true;
             }
             _currentState = State.changeManaged;
-            emit NewVote(msg.sender, acceptChange, _currentState, "Not rejected");
+            emit NewVote(msg.sender, acceptChange, _currentState, "Management Vote", _voteCount);
         }
         else {
             _currentState = State.changeRejected;
             _rejectionReason = rejectionReason;
-            emit NewVote(msg.sender, acceptChange, _currentState, _rejectionReason);
+            emit NewVote(msg.sender, acceptChange, _currentState, _rejectionReason, 0);
         }
     }
 
     function responsibleVote(bool acceptChange, string rejectionReason) public {
         require(_currentState == State.changeManaged);
-        require(!_voted[msg.sender]);
-        _voted[msg.sender] = true;
+        require(_allowdToVote[msg.sender]);
+        _allowdToVote[msg.sender] = false;
         if (!acceptChange) {
             _currentState = State.changeRejected;
             _rejectionReason = rejectionReason;
-            emit NewVote(msg.sender, acceptChange, _currentState, _rejectionReason);
+            emit NewVote(msg.sender, acceptChange, _currentState, _rejectionReason, 0);
         }
         else {
             _voteCount = _voteCount - 1;
             if (_voteCount == 0) {
                 _currentState = State.changeApproved;
-                emit NewVote(msg.sender, acceptChange, _currentState, "Not rejected");
+                emit NewVote(msg.sender, acceptChange, _currentState, "Vote Finished", _voteCount);
             }
             else {
-                emit NewVote(msg.sender, acceptChange, _currentState, "Not rejected");
+                emit NewVote(msg.sender, acceptChange, _currentState, "Responsible Vote", _voteCount);
             }
         }
     }
@@ -77,6 +78,6 @@ contract ChangeRequest is ChangeTracker{
     function releaseChange() public {
         require(_currentState == State.changeApproved);
         _currentState = State.changeReleased;
-        emit NewVote(msg.sender, true, _currentState, "Released");
+        emit NewVote(msg.sender, true, _currentState, "Released", 0);
     }
 }

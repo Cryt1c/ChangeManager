@@ -1,9 +1,9 @@
-let ChangeManager = artifacts.require("./ChangeManager.sol");
-let ChangeRequest = artifacts.require("./ChangeRequest.sol");
+let ChangeManager = artifacts.require('./ChangeManager.sol');
+let ChangeRequest = artifacts.require('./ChangeRequest.sol');
 
-let gitHashFirst = "0x1a034128a329f4fb7a53043dd1d1e8f74bfc91fc";
-let gitHashSecond = "0x29932f3915935d773dc8d52c292cadd81c81071d";
-let additionalInformation = "These are additional information";
+let gitHashFirst = '0x1a034128a329f4fb7a53043dd1d1e8f74bfc91fc';
+let gitHashSecond = '0x29932f3915935d773dc8d52c292cadd81c81071d';
+let additionalInformation = 'These are additional information';
 let costs = 2400;
 let estimation = 24;
 
@@ -17,23 +17,22 @@ let State = {
 };
 
 contract('ChangeManager', function (accounts) {
-    it("should create a new ChangeRequest", async function () {
-        let changemanager = await  ChangeManager.deployed()
+    it('should create a new ChangeRequest', async function () {
+        let changemanager = await  ChangeManager.deployed();
         let result = await changemanager.createNewChangeRequest(gitHashFirst, additionalInformation, costs, estimation);
-        result.logs.filter(log => log.event === "NewChangeRequest")
+        result.logs.filter(log => log.event === 'NewChangeRequest')
             .map(log => log.args)
             .forEach(args => {
-                // console.log("Args1: ", args);
                 changeRequestAddressFirst = args._changeRequestAddress;
                 assert.equal(args._gitHash, gitHashFirst, 'Correct git hash has not been returned');
                 assert.equal(args._additionalInformation, additionalInformation, 'Correct additional information have not been returned');
                 assert.equal(args._costs, costs, 'Corrects costs have not been returned');
                 assert.equal(args._estimation, estimation, 'Correct estimation has not been returned');
-                assert.isNotNull(changeRequestAddressFirst, "ChangeRequest contract address was null");
+                assert.isNotNull(changeRequestAddressFirst, 'ChangeRequest contract address was null');
             });
     });
 
-    it("should get the data of the newly created ChangeRequest", async function () {
+    it('should get the data of the newly created ChangeRequest', async function () {
         changerequestFirst = ChangeRequest.at(changeRequestAddressFirst);
         let result = await changerequestFirst.viewChange();
         assert.equal(result[0], gitHashFirst, 'Correct git hash has not been returned');
@@ -42,9 +41,9 @@ contract('ChangeManager', function (accounts) {
         assert.equal(result[3], estimation, 'Correct estimation has not been returned');
     });
 
-    it("should vote the newly created ChangeRequest down", async function () {
-        let result = await changerequestFirst.managementVote(false, [], "This is the reason why the change request is being rejected", {from: accounts[0]})
-        result.logs.filter(log => log.event === "NewVote")
+    it('should vote the newly created ChangeRequest down', async function () {
+        let result = await changerequestFirst.managementVote(false, [], 'This is the reason why the change request is being rejected', {from: accounts[0]})
+        result.logs.filter(log => log.event === 'NewVote')
             .map(log => log.args)
             .forEach(args => {
                 assert.equal(args._vote, false, 'The vote has not been downvoted');
@@ -53,56 +52,56 @@ contract('ChangeManager', function (accounts) {
             });
     });
 
-    it("should not be able to vote on a downvoted ChangeRequest", async function () {
-        await changerequestFirst.responsibleVote(true, "This is the reason why the change request is being rejected", {from: accounts[1]})
+    it('should not be able to vote on a downvoted ChangeRequest', async function () {
+        await changerequestFirst.responsibleVote(true, 'This is the reason why the change request is being rejected', {from: accounts[1]})
             .catch(error => {
                 assert.include(error.message, 'revert', 'The vote has not been reverted');
             });
     });
 
-    it("should create a new ChangeRequest and be accepted by all parties", async function () {
+    it('should create a new ChangeRequest and be accepted by all parties', async function () {
 
         // Create new ChangeRequest
         let changemanager = await ChangeManager.deployed();
         let result = await changemanager.createNewChangeRequest(gitHashSecond, additionalInformation, costs, estimation);
-        result.logs.filter(log => log.event === "NewChangeRequest")
+        result.logs.filter(log => log.event === 'NewChangeRequest')
             .map(log => log.args)
             .forEach(args => {
-                // console.log("Args2: ", args);
+                assert.isNotNull(args._changeRequestAddress, 'ChangeRequest address was not null');
                 changeRequestAddressSecond = args._changeRequestAddress;
             });
         changerequestSecond = ChangeRequest.at(changeRequestAddressSecond);
 
         // Manage the new ChangeRequest and set Account 1 + 2 as responsible Parties
-        result = await changerequestSecond.managementVote(true, [accounts[1], accounts[2]], "", {from: accounts[0]})
-        result.logs.filter(log => log.event === "NewVote")
+        result = await changerequestSecond.managementVote(true, [accounts[1], accounts[2]], '', {from: accounts[0]});
+        result.logs.filter(log => log.event === 'NewVote')
             .map(log => log.args)
             .forEach(args => {
-                // console.log("Args3: ", args);
-                assert.equal(args._currentState, State.changeManaged, 'The change has not been rejected');
+                assert.equal(args._currentState, State.changeManaged, 'The change has been rejected');
             });
 
         // Illegally try to vote from Account 4
-        changerequestSecond.responsibleVote(true, "", {from: accounts[4]})
+        changerequestSecond.responsibleVote(true, '', {from: accounts[4]})
             .catch(error => {
-                assert.include(error.message, 'revert', 'An unallowed party was able to vote');
+                assert.include(error.message, 'revert', 'An unallowed party was not able to vote');
             });
 
         // Accept change using Account 1 + 2
-        await changerequestSecond.responsibleVote(true, "", {from: accounts[2]});
-        result = await changerequestSecond.responsibleVote(true, "", {from: accounts[1]});
-        result.logs.filter(log => log.event === "NewVote")
+        await changerequestSecond.responsibleVote(true, '', {from: accounts[2]});
+        result = await changerequestSecond.responsibleVote(true, '', {from: accounts[1]});
+        result.logs.filter(log => log.event === 'NewVote')
             .map(log => log.args)
             .forEach(args => {
-                // console.log("Args5: ", args);
+                assert.equal(args._currentState, State.changeApproved, 'The change has been approved');
+                assert.equal(args._votesLeft, 0, 'There are 0 votes left')
             });
 
         // Release the Change
         result = await changerequestSecond.releaseChange().then(function (result) {
-            result.logs.filter(log => log.event === "NewVote")
+            result.logs.filter(log => log.event === 'NewVote')
                 .map(log => log.args)
                 .forEach(args => {
-                    // console.log("Args5: ", args);
+                    assert.equal(args._currentState, State.changeReleased, 'The change has been released');
                 });
         });
     });

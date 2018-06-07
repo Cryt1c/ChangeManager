@@ -11,5 +11,6 @@ contract ChangeTracker {
         string additionalInformation;
         uint256 costs;
         uint256 estimation;
+        State state;
     }
 }

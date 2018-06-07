@@ -4,6 +4,7 @@ pragma experimental ABIEncoderV2;
 import {ChangeTracker} from './ChangeTracker.sol';
 import {ChangeRequest} from './ChangeRequest.sol';
 
+// This contracts serves as a ChangeRequest factory
 contract ChangeManager {
     address private _constructionManager;
     ChangeRequest[] private _changes;
@@ -16,20 +17,11 @@ contract ChangeManager {
         uint256 _estimation
     );
 
-    //    // TODO: Use roles from SIMULTAN
-    //    enum Role {
-    //        constructionManager, architect, engineer, electrician, contractor
-    //    }
-    //
-    //    struct StakeHolder {
-    //        address identity;
-    //        Role role;
-    //    }
-
     constructor() public {
         _constructionManager = msg.sender;
     }
 
+    // Creates a new ChangeRequest contract and saves the address in _changes
     function createNewChangeRequest(
         bytes20 gitHash, string additionalInformation, uint256 costs, uint256 estimation
     ) public

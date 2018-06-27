@@ -65,47 +65,47 @@ contract('ChangeManager Voting', function (accounts) {
             });
     });
 
-    it('should not be able to vote on a downvoted ChangeRequest', async function () {
-        await changemanager.responsibleVote(gitHashFirst, true, 'This is the reason why the change request is being rejected', {from: accounts[1]})
-            .catch(error => {
-                assert.include(error.message, 'revert', 'The vote has not been reverted');
-            });
-    });
-
-    it('should create a new ChangeRequest and be accepted by all parties', async function () {
-        // Create new ChangeRequest
-        let changemanager = await ChangeManager.deployed();
-        let result = await changemanager.createNewChangeRequest(gitHashSecond, additionalInformation, costs, estimation);
-        result.logs.filter(log => log.event === 'NewChangeRequest')
-            .map(log => log.args)
-            .forEach(args => {
-                assert.isNotNull(args._changeRequestAddress, 'ChangeRequest address was not null');
-                changeRequestAddressSecond = args._changeRequestAddress;
-            });
-
-        // Manage the new ChangeRequest and set Account 1 + 2 as responsible Parties
-        result = await changemanager.managementVote(gitHashSecond, true, [accounts[1], accounts[2]], '', {from: accounts[0]});
-        result.logs.filter(log => log.event === 'NewVote')
-            .map(log => log.args)
-            .forEach(args => {
-                assert.equal(args._currentState, State.changeManaged, 'The change has been rejected');
-            });
-
-        // Illegally try to vote from Account 4
-        changemanager.responsibleVote(gitHashSecond, true, '', {from: accounts[4]})
-            .catch(error => {
-                assert.include(error.message, 'revert', 'An unallowed party was not able to vote');
-            });
-
-        // Accept change using Account 1 + 2
-        await changemanager.responsibleVote(gitHashSecond, true, '', {from: accounts[2]});
-        result = await changemanager.responsibleVote(gitHashSecond, true, '', {from: accounts[1]});
-        result.logs.filter(log => log.event === 'NewVote')
-            .map(log => log.args)
-            .forEach(args => {
-                assert.equal(args._currentState, State.changeApproved, 'The change has been approved');
-                assert.equal(args._votesLeft, 0, 'There are 0 votes left')
-            });
+    // it('should not be able to vote on a downvoted ChangeRequest', async function () {
+    //     await changemanager.responsibleVote(gitHashFirst, true, 'This is the reason why the change request is being rejected', {from: accounts[1]})
+    //         .catch(error => {
+    //             assert.include(error.message, 'revert', 'The vote has not been reverted');
+    //         });
+    // });
+    //
+    // it('should create a new ChangeRequest and be accepted by all parties', async function () {
+    //     // Create new ChangeRequest
+    //     let changemanager = await ChangeManager.deployed();
+    //     let result = await changemanager.createNewChangeRequest(gitHashSecond, additionalInformation, costs, estimation);
+    //     result.logs.filter(log => log.event === 'NewChangeRequest')
+    //         .map(log => log.args)
+    //         .forEach(args => {
+    //             assert.isNotNull(args._changeRequestAddress, 'ChangeRequest address was not null');
+    //             changeRequestAddressSecond = args._changeRequestAddress;
+    //         });
+    //
+    //     // Manage the new ChangeRequest and set Account 1 + 2 as responsible Parties
+    //     result = await changemanager.managementVote(gitHashSecond, true, [accounts[1], accounts[2]], '', {from: accounts[0]});
+    //     result.logs.filter(log => log.event === 'NewVote')
+    //         .map(log => log.args)
+    //         .forEach(args => {
+    //             assert.equal(args._currentState, State.changeManaged, 'The change has been rejected');
+    //         });
+    //
+    //     // Illegally try to vote from Account 4
+    //     changemanager.responsibleVote(gitHashSecond, true, '', {from: accounts[4]})
+    //         .catch(error => {
+    //             assert.include(error.message, 'revert', 'An unallowed party was not able to vote');
+    //         });
+    //
+    //     // Accept change using Account 1 + 2
+    //     await changemanager.responsibleVote(gitHashSecond, true, '', {from: accounts[2]});
+    //     result = await changemanager.responsibleVote(gitHashSecond, true, '', {from: accounts[1]});
+    //     result.logs.filter(log => log.event === 'NewVote')
+    //         .map(log => log.args)
+    //         .forEach(args => {
+    //             assert.equal(args._currentState, State.changeApproved, 'The change has been approved');
+    //             assert.equal(args._votesLeft, 0, 'There are 0 votes left')
+    //         });
 
         // // Release the Change
         // result = await changerequestSecond.releaseChange().then(function (result) {
@@ -115,5 +115,5 @@ contract('ChangeManager Voting', function (accounts) {
         //             assert.equal(args._currentState, State.changeReleased, 'The change has been released');
         //         });
         // });
-    });
+    // });
 });

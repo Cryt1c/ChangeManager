@@ -17,14 +17,14 @@ contract ChangeManager is ChangeTracker{
         uint256 _estimation
     );
 
-    // This event gets propagated every time a new Vote happens and tracks the _currentChange.state and the _votesLeft
-    event NewVote(
-        address _voter,
-        bool _vote,
-        State _currentState,
-        string _voteInfo,
-        uint256 _votesLeft
-    );
+//    // This event gets propagated every time a new Vote happens and tracks the _currentChange.state and the _votesLeft
+//    event NewVote(
+//        address _voter,
+//        bool _vote,
+//        State _currentState,
+//        string _voteInfo,
+//        uint256 _votesLeft
+//    );
 
     constructor() public {
         _constructionManager = msg.sender;
@@ -53,37 +53,7 @@ contract ChangeManager is ChangeTracker{
     )
     public
     {
-        require(_changeRequests[gitHash].getState() == State.changeProposed);
-        require(msg.sender == _constructionManager);
-
-        ChangeRequest changeRequest = _changeRequests[gitHash];
-
-        if (acceptChange) {
-            changeRequest.setVoteCount(responsibleParties.length, msg.sender);
-            for (uint i = 0; i < responsibleParties.length; i++) {
-                changeRequest.setAllowedToVote(responsibleParties[i], msg.sender);
-            }
-            changeRequest.setState(State.changeManaged, msg.sender);
-
-            emit NewVote(
-                msg.sender,
-                acceptChange,
-                changeRequest.getState(),
-                changeRequest.getVoteInfo(),
-                changeRequest.getVoteCount()
-            );
-        }
-        else {
-            changeRequest.setState(State.changeRejected, msg.sender);
-            changeRequest.setVoteInfo(voteInfo, msg.sender);
-            emit NewVote(
-                msg.sender,
-                acceptChange,
-                changeRequest.getState(),
-                changeRequest.getVoteInfo(),
-                0
-            );
-        }
+        _changeRequests[gitHash].managementVote(acceptChange, responsibleParties, voteInfo);
     }
 
     function responsibleVote(
@@ -93,47 +63,7 @@ contract ChangeManager is ChangeTracker{
     )
     public
     {
-        require(_changeRequests[gitHash].getState() == State.changeManaged);
-
-        ChangeRequest changeRequest = _changeRequests[gitHash];
-
-        require(changeRequest.isAllowedToVote(msg.sender));
-
-        if (!acceptChange) {
-            changeRequest.setState(State.changeRejected, msg.sender);
-            changeRequest.setVoteInfo(voteInfo, msg.sender);
-            emit NewVote(
-                msg.sender,
-                acceptChange,
-                changeRequest.getState(),
-                changeRequest.getVoteInfo(),
-                0
-            );
-        }
-        else {
-            changeRequest.reduceVoteCount(msg.sender);
-            if (changeRequest.getVoteCount() == 0) {
-                changeRequest.setState(State.changeApproved, msg.sender);
-                emit NewVote(
-                    msg.sender,
-                    acceptChange,
-                    changeRequest.getState(),
-                    "Vote Finished",
-                    changeRequest.getVoteCount()
-                );
-            }
-            else {
-                emit NewVote(
-                    msg.sender,
-                    acceptChange,
-                    changeRequest.getState(),
-                    "Responsible Vote",
-                    changeRequest.getVoteCount()
-                );
-            }
-        }
-
-        changeRequest.setNotAllowedToVote(msg.sender, msg.sender);
+        _changeRequests[gitHash].responsibleVote(acceptChange, voteInfo);
     }
 
     // Returns the address of the ChangeRequest

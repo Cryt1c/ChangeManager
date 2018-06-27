@@ -51,7 +51,7 @@ contract ChangeRequest is ChangeTracker {
     // Function can only be run by the owner of the ChangeManager contract (construction manager). The construction
     // manager does the first review of the ChangeRequest, can reject it or employ the responsible parties who are
     // allowed to vote on the change.
-    function managementVote(bool acceptChange, address[] responsibleParties, string rejectionReason)
+    function managementVote(bool acceptChange, address[] responsibleParties, string rejectionReason, address constructionManager)
     public
     {
         require(msg.sender == _constructionManager);
@@ -93,51 +93,6 @@ contract ChangeRequest is ChangeTracker {
             }
         }
     }
-
-    function setVoteCount(uint256 voteCount, address setter) public {
-        require(setter == _constructionManager);
-        _voteCount = voteCount;
-    }
-
-    // Problem: Voting is not an atomic function ->
-    //Can reduce vote without removing oneself from the allowedToVote list
-    function reduceVoteCount(address setter) public {
-        require(_allowedToVote[setter]);
-        _voteCount = _voteCount - 1;
-    }
-
-    function getVoteCount() public view returns (uint256){return _voteCount;}
-
-    // Only the manager is allowed to set allowance to vote
-    function setAllowedToVote(address responsibleParty, address setter) public {
-        require(setter == _constructionManager);
-        _allowedToVote[responsibleParty] = true;
-    }
-
-    // Only manager and the responsible party itself are allowed to revoke allowance to vote
-    function setNotAllowedToVote(address responsibleParty, address setter) public {
-        require(setter == _constructionManager || setter == responsibleParty);
-        _allowedToVote[responsibleParty] = false;
-    }
-
-    function isAllowedToVote(address party) public view returns (bool){
-        return _allowedToVote[party];
-    }
-
-    // Problem: responsibleParty can just change the state without caring about voting
-    function setState(State state, address setter) public {
-        require(setter == _constructionManager || _allowedToVote[setter]);
-        _state = state;
-    }
-
-    function getState() public view returns (State){return _state;}
-
-    function setVoteInfo(string voteInfo, address setter) public {
-        require(setter == _constructionManager || _allowedToVote[setter]);
-        _voteInfo = voteInfo;
-    }
-
-    function getVoteInfo() public view returns (string){return _voteInfo;}
 
     // The ChangeRequest has been accepted and can be released.
     function releaseChange() public {

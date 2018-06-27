@@ -6,10 +6,30 @@ contract ChangeTracker {
     }
 
     struct Change {
-        bytes20 gitHash;
-        string additionalInformation;
-        uint256 costs;
-        uint256 estimation;
-        State state;
+        address _changeOwner;
+        bytes20 _gitHash;
+        string _additionalInformation;
+        uint256 _costs;
+        uint256 _estimation;
+        State _state;
+        mapping(address => bool) _allowedToVote;
+        uint256 _voteCount;
+        string _voteInfo;
     }
+
+    event NewChangeRequest(
+        bytes20 indexed _gitHash,
+        string _additionalInformation,
+        uint256 _costs,
+        uint256 _estimation
+    );
+
+    // This event gets propagated every time a new Vote happens and tracks the _currentChange.state and the _votesLeft
+    event NewVote(
+        address _voter,
+        bool _vote,
+        State _currentState,
+        string _voteInfo,
+        uint256 _votesLeft
+    );
 }

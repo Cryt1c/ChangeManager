@@ -1,6 +1,6 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.4.23;
 
-import {ChangeTracker} from './ChangeTracker.sol';
+import {ChangeTracker} from "./ChangeTracker.sol";
 
 // This contracts serves as a ChangeRequest factory
 contract ChangeManager is ChangeTracker {
@@ -80,6 +80,7 @@ contract ChangeManager is ChangeTracker {
         if (!acceptChange) {
             change._state = State.changeRejected;
             change._voteInfo = voteInfo;
+            change._voteCount = 0;
             emit NewVote(msg.sender, acceptChange, change._state, change._voteInfo, 0);
         }
         else {

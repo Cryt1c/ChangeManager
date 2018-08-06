@@ -13,18 +13,19 @@ let State = {
 };
 
 contract('ChangeManager', function (accounts) {
-    it('should have emitted event with contract address', async function () {
-        changemanager = await  ChangeManager.deployed();
-        let event = changemanager.allEvents({fromBlock: 0, toBlock: 'latest'});
-
-        event.watch(function (error, result) {
-            if (!error && result.event === 'NewChangeManager') {
-                assert.isNotNull(result.args._changeManagerAddress);
-            }
-        });
-    });
+    // it('should have emitted event with contract address', async function () {
+    //     changemanager = await ChangeManager.deployed();
+    //     let event = changemanager.allEvents({fromBlock: 0, toBlock: 'latest'});
+    //
+    //     event.watch(function (error, result) {
+    //         if (!error && result.event === 'NewChangeManager') {
+    //             console.log(result.args);
+    //             assert.isNotNull(result.args._changeManagerAddress);
+    //         }
+    //     });
+    // });
     it('should create a new ChangeRequest', async function () {
-        let changemanager = await  ChangeManager.deployed();
+        changemanager = await ChangeManager.deployed();
         let result = await changemanager.createNewChangeRequest(gitHashFirst, additionalInformation, costs, estimation);
         result.logs.filter(log => log.event === 'NewChangeRequest')
             .map(log => log.args)
@@ -65,8 +66,18 @@ contract('ChangeManager', function (accounts) {
         // Create new ChangeRequest
         let changemanager = await ChangeManager.deployed();
 
+        let result = await changemanager.createNewChangeRequest(gitHashSecond, additionalInformation, costs, estimation);
+        result.logs.filter(log => log.event === 'NewChangeRequest')
+            .map(log => log.args)
+            .forEach(args => {
+                assert.equal(args._gitHash, gitHashSecond, 'Correct git hash has not been returned');
+                assert.equal(args._additionalInformation, additionalInformation, 'Correct additional information have not been returned');
+                assert.equal(args._costs, costs, 'Correct costs have not been returned');
+                assert.equal(args._estimation, estimation, 'Correct estimation has not been returned');
+            });
+
         // Manage the new ChangeRequest and set Account 1 + 2 as responsible Parties
-        let result = await changemanager.managementVote(gitHashSecond, true, [accounts[1], accounts[2]], '', {from: accounts[0]});
+        result = await changemanager.managementVote(gitHashSecond, true, [accounts[1], accounts[2]], '', {from: accounts[0]});
         result.logs.filter(log => log.event === 'NewVote')
             .map(log => log.args)
             .forEach(args => {

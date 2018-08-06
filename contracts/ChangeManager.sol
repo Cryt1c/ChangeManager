@@ -55,12 +55,12 @@ contract ChangeManager is ChangeTracker {
                 change._allowedToVote[responsibleParties[i]] = true;
             }
             change._state = State.changeManaged;
-            emit NewVote(msg.sender, acceptChange, change._state, "Management Vote", change._voteCount);
+            emit NewVote(gitHash, msg.sender, acceptChange, change._state, "Management Vote", change._voteCount);
         }
         else {
             change._state = State.changeRejected;
             change._voteInfo = voteInfo;
-            emit NewVote(msg.sender, acceptChange, change._state, change._voteInfo, 0);
+            emit NewVote(gitHash, msg.sender, acceptChange, change._state, change._voteInfo, 0);
         }
     }
 
@@ -81,16 +81,16 @@ contract ChangeManager is ChangeTracker {
             change._state = State.changeRejected;
             change._voteInfo = voteInfo;
             change._voteCount = 0;
-            emit NewVote(msg.sender, acceptChange, change._state, change._voteInfo, 0);
+            emit NewVote(gitHash, msg.sender, acceptChange, change._state, change._voteInfo, 0);
         }
         else {
             change._voteCount = change._voteCount - 1;
             if (change._voteCount == 0) {
                 change._state = State.changeApproved;
-                emit NewVote(msg.sender, acceptChange, change._state, "Vote Finished", change._voteCount);
+                emit NewVote(gitHash, msg.sender, acceptChange, change._state, "Vote Finished", change._voteCount);
             }
             else {
-                emit NewVote(msg.sender, acceptChange, change._state, "Responsible Vote", change._voteCount);
+                emit NewVote(gitHash, msg.sender, acceptChange, change._state, "Responsible Vote", change._voteCount);
             }
         }
     }
@@ -99,7 +99,7 @@ contract ChangeManager is ChangeTracker {
     function releaseChange(bytes20 gitHash) public {
         require(_changes[gitHash]._state == State.changeApproved);
         _changes[gitHash]._state = State.changeReleased;
-        emit NewVote(msg.sender, true, _changes[gitHash]._state, "Released", 0);
+        emit NewVote(gitHash, msg.sender, true, _changes[gitHash]._state, "Released", 0);
     }
 
     // Returns the address of a change

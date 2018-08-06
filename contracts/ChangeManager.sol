@@ -55,12 +55,11 @@ contract ChangeManager is ChangeTracker {
                 change._allowedToVote[responsibleParties[i]] = true;
             }
             change._state = State.changeManaged;
-            emit NewVote(gitHash, msg.sender, acceptChange, change._state, "Management Vote", change._voteCount);
+            emit NewVote(gitHash, msg.sender, acceptChange, change._state, voteInfo, change._voteCount);
         }
         else {
             change._state = State.changeRejected;
-            change._voteInfo = voteInfo;
-            emit NewVote(gitHash, msg.sender, acceptChange, change._state, change._voteInfo, 0);
+            emit NewVote(gitHash, msg.sender, acceptChange, change._state, voteInfo, 0);
         }
     }
 
@@ -79,18 +78,17 @@ contract ChangeManager is ChangeTracker {
         change._allowedToVote[msg.sender] = false;
         if (!acceptChange) {
             change._state = State.changeRejected;
-            change._voteInfo = voteInfo;
             change._voteCount = 0;
-            emit NewVote(gitHash, msg.sender, acceptChange, change._state, change._voteInfo, 0);
+            emit NewVote(gitHash, msg.sender, acceptChange, change._state, voteInfo, 0);
         }
         else {
             change._voteCount = change._voteCount - 1;
             if (change._voteCount == 0) {
                 change._state = State.changeApproved;
-                emit NewVote(gitHash, msg.sender, acceptChange, change._state, "Vote Finished", change._voteCount);
+                emit NewVote(gitHash, msg.sender, acceptChange, change._state, voteInfo, change._voteCount);
             }
             else {
-                emit NewVote(gitHash, msg.sender, acceptChange, change._state, "Responsible Vote", change._voteCount);
+                emit NewVote(gitHash, msg.sender, acceptChange, change._state, voteInfo, change._voteCount);
             }
         }
     }
@@ -119,12 +117,11 @@ contract ChangeManager is ChangeTracker {
     function viewState(bytes20 gitHash)
     public
     view
-    returns (State state, uint256 voteCount, string voteInfo)
+    returns (State state, uint256 voteCount)
     {
         return (
         _changes[gitHash]._state,
-        _changes[gitHash]._voteCount,
-        _changes[gitHash]._voteInfo
+        _changes[gitHash]._voteCount
         );
     }
 }

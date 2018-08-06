@@ -13,17 +13,6 @@ let State = {
 };
 
 contract('ChangeManager', function (accounts) {
-    // it('should have emitted event with contract address', async function () {
-    //     changemanager = await ChangeManager.deployed();
-    //     let event = changemanager.allEvents({fromBlock: 0, toBlock: 'latest'});
-    //
-    //     event.watch(function (error, result) {
-    //         if (!error && result.event === 'NewChangeManager') {
-    //             console.log(result.args);
-    //             assert.isNotNull(result.args._changeManagerAddress);
-    //         }
-    //     });
-    // });
     it('should create a new ChangeRequest', async function () {
         changemanager = await ChangeManager.deployed();
         let result = await changemanager.createNewChangeRequest(gitHashFirst, additionalInformation, costs, estimation);

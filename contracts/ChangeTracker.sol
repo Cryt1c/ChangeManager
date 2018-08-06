@@ -14,7 +14,6 @@ contract ChangeTracker {
         State _state;
         mapping(address => bool) _allowedToVote;
         uint256 _voteCount;
-        string _voteInfo;
     }
 
     event NewChangeRequest(

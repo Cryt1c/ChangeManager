@@ -5,7 +5,7 @@ import {ChangeTracker} from "./ChangeTracker.sol";
 // This contracts serves as a ChangeRequest factory
 contract ChangeManager is ChangeTracker {
     address private _constructionManager;
-    mapping(bytes20 => Change) private _changes;
+    mapping(bytes20 => ChangeRequest) private _changes;
 
     constructor() public {
         _constructionManager = msg.sender;
@@ -20,7 +20,9 @@ contract ChangeManager is ChangeTracker {
     )
     public
     {
-        Change memory change;
+        require(_changes[gitHash]._gitHash == bytes20(0), "ChangeRequest already exists");
+
+        ChangeRequest memory change;
 
         change._gitHash = gitHash;
         change._additionalInformation = additionalInformation;
@@ -45,9 +47,9 @@ contract ChangeManager is ChangeTracker {
     )
     public
     {
-        Change storage change = _changes[gitHash];
-        require(msg.sender == _constructionManager);
-        require(change._state == State.changeProposed);
+        ChangeRequest storage change = _changes[gitHash];
+        require(msg.sender == _constructionManager, "Sender not construction manager");
+        require(change._state == State.changeProposed, "State not ChangeProposed");
 
         if (acceptChange) {
             change._voteCount = responsibleParties.length;
@@ -64,7 +66,6 @@ contract ChangeManager is ChangeTracker {
     }
 
     // The allowed parties can vote. As soon as everyone has voted the ChangeRequest is either accepted or rejected
-    // TODO: If it's rejected, the changeOwner can amend the ChangeRequest and restart the voting process.
     function responsibleVote(
         bytes20 gitHash,
         bool acceptChange,
@@ -72,9 +73,9 @@ contract ChangeManager is ChangeTracker {
     )
     public
     {
-        Change storage change = _changes[gitHash];
-        require(change._state == State.changeManaged);
-        require(change._allowedToVote[msg.sender]);
+        ChangeRequest storage change = _changes[gitHash];
+        require(change._state == State.changeManaged, "State not ChangeManaged");
+        require(change._allowedToVote[msg.sender], "Sender not allowed to vote");
         change._allowedToVote[msg.sender] = false;
         if (!acceptChange) {
             change._state = State.changeRejected;
@@ -93,12 +94,12 @@ contract ChangeManager is ChangeTracker {
         }
     }
 
-    // The ChangeRequest has been accepted and can be released.
-    function releaseChange(bytes20 gitHash) public {
-        require(_changes[gitHash]._state == State.changeApproved);
-        _changes[gitHash]._state = State.changeReleased;
-        emit NewVote(gitHash, msg.sender, true, _changes[gitHash]._state, "Released", 0);
-    }
+//    // The ChangeRequest has been accepted and can be released.
+//    function releaseChange(bytes20 gitHash) public {
+//        require(_changes[gitHash]._state == State.changeApproved);
+//        _changes[gitHash]._state = State.changeReleased;
+//        emit NewVote(gitHash, msg.sender, true, _changes[gitHash]._state, "Released", 0);
+//    }
 
     // Returns the address of a change
     function viewChange(bytes20 gitHash)

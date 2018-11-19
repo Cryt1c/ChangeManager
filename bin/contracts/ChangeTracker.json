@@ -1,0 +1,14 @@
+{
+    "abi": "[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_gitHash\",\"type\":\"bytes20\"},{\"indexed\":false,\"name\":\"_additionalInformation\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"_costs\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"_estimation\",\"type\":\"uint256\"}],\"name\":\"NewChangeRequest\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"_gitHash\",\"type\":\"bytes20\"},{\"indexed\":false,\"name\":\"_voter\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"_vote\",\"type\":\"bool\"},{\"indexed\":false,\"name\":\"_currentState\",\"type\":\"uint8\"},{\"indexed\":false,\"name\":\"_voteInfo\",\"type\":\"string\"},{\"indexed\":false,\"name\":\"_votesLeft\",\"type\":\"uint256\"}],\"name\":\"NewVote\",\"type\":\"event\"}]",
+    "bytecode": "6080604052348015600f57600080fd5b50603580601d6000396000f3006080604052600080fd00a165627a7a72305820c269d08b5e3f96eb16d6f1b52dac93297bb6a8f81ec448ec64d1cf5d06dd48db0029",
+    "functionHashes": {},
+    "gasEstimates": {
+        "creation": [
+            66,
+            10600
+        ],
+        "external": {},
+        "internal": {}
+    },
+    "runtimeBytecode": "6080604052600080fd00a165627a7a72305820c269d08b5e3f96eb16d6f1b52dac93297bb6a8f81ec448ec64d1cf5d06dd48db0029"
+}

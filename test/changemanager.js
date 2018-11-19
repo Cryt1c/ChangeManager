@@ -26,6 +26,14 @@ contract('ChangeManager', function (accounts) {
             });
     });
 
+    it('should not create an already existing ChangeRequest', async function () {
+        changemanager = await ChangeManager.deployed();
+        let result = await changemanager.createNewChangeRequest(gitHashFirst, additionalInformation, costs, estimation)
+            .catch(error => {
+                assert.include(error.message, 'revert', 'CreateNewChangeRequest has not been reverted');
+            });
+    });
+
     it('should get the data of the newly created ChangeRequest', async function () {
         let result = await changemanager.viewChange(gitHashFirst);
         assert.equal(result[0], additionalInformation, 'Correct additional information have not been returned');
@@ -89,13 +97,13 @@ contract('ChangeManager', function (accounts) {
                 assert.equal(args._votesLeft, 0, 'There are 0 votes left')
             });
 
-        // Release the Change
-        result = await changemanager.releaseChange(gitHashSecond).then(function (result) {
-            result.logs.filter(log => log.event === 'NewVote')
-                .map(log => log.args)
-                .forEach(args => {
-                    assert.equal(args._currentState, State.changeReleased, 'The change has been released');
-                });
-        });
+        // // Release the Change
+        // result = await changemanager.releaseChange(gitHashSecond).then(function (result) {
+        //     result.logs.filter(log => log.event === 'NewVote')
+        //         .map(log => log.args)
+        //         .forEach(args => {
+        //             assert.equal(args._currentState, State.changeReleased, 'The change has been released');
+        //         });
+        // });
     });
 });

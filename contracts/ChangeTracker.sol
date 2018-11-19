@@ -5,7 +5,7 @@ contract ChangeTracker {
         changeProposed, changeManaged, changeApproved, changeRejected, changeReleased
     }
 
-    struct Change {
+    struct ChangeRequest {
         address _changeOwner;
         bytes20 _gitHash;
         string _additionalInformation;
